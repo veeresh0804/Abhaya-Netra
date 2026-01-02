@@ -1,6 +1,7 @@
 package com.example.deepfakeai
 
 import android.Manifest
+import android.graphics.Bitmap
 import android.content.pm.PackageManager
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -78,24 +79,7 @@ class MainActivity : AppCompatActivity() {
         val viewFinder = findViewById<PreviewView>(R.id.viewFinder)
 
         // Initialize Face Detector Helper
-        faceDetectorHelper = FaceDetectorHelper(
-            onSuccess = { bounds ->
-                // Ensure UI updates on Main Thread if not already (safeguard)
-                runOnUiThread {
-                    val statusTextView = findViewById<TextView>(R.id.statusTextView)
-                    if (bounds != null) {
-                        Log.i("FACE_DETECTION", "FACE DETECTED bbox=$bounds")
-                        statusTextView.text = "Face detected ✅"
-                    } else {
-                        Log.i("FACE_DETECTION", "NO FACE DETECTED")
-                        statusTextView.text = "No face detected ❌"
-                    }
-                }
-            },
-            onError = { e ->
-                Log.e("FACE_DETECTION", "Error in detection", e)
-            }
-        )
+        faceDetectorHelper = FaceDetectorHelper()
 
         // Initialize TFLite Interpreter
         try {
@@ -178,30 +162,36 @@ class MainActivity : AppCompatActivity() {
             
             val mediaImage = imageProxy.image
             if (mediaImage != null) {
-                // We use ML Kit's InputImage directly for efficiency if FaceDetectorHelper supports it.
-                // But the helper accepts Bitmap. We must convert.
-                // Converting YUV ImageProxy to Bitmap is complex without a helper.
-                // However, since we are doing low FPS, we can use the BitmapFactory decode approach simply IF valid.
-                // Actually, standard way is YuvToRgbConverter or simply:
-                // ML Kit supports mediaImage directly.
-                // We will modify the flow for Camera to use a special helper method or direct call.
-                // BUT requirements say "Convert the ImageProxy frame into a Bitmap format".
-                // We'll use a simple transformation (e.g. toBitmap() extension if available or basic copy).
-                // CameraX 1.3.0 has .toBitmap() on ImageProxy!
-                // We need to verify if we included that dep. 'androidx.camera:camera-core' has it? 
-                // It is in 'androidx.camera:camera-core' since 1.1.0-alpha08 usually requires YUV conversion logic internally.
-                // Let's rely on .toBitmap() which is safe and easy for low FPS.
+                 val bitmap = imageProxy.toBitmap()
                 
-                val bitmap = imageProxy.toBitmap()
-                
-                // Switch to main thread for UI updates? FaceDetectorHelper logs, but if we assume it's thread safe we can call it.
-                // Our Helper uses a callback.
-                faceDetectorHelper?.detectFace(bitmap)
-                
-                // Update UI on main thread
-                runOnUiThread {
+                 faceDetectorHelper?.detectFace(
+                     bitmap = bitmap,
+                     onSuccess = { bounds ->
+                        runOnUiThread {
+                            val statusTextView = findViewById<TextView>(R.id.statusTextView)
+                            if (bounds != null) {
+                                Log.i("FACE_DETECTION", "FACE DETECTED bbox=$bounds")
+                                statusTextView.text = "Face detected ✅"
+                                
+                                // Preprocess off main thread
+                                processingScope.launch(Dispatchers.Default) {
+                                    preprocessFaceForModel(bitmap, bounds)
+                                }
+                            } else {
+                                Log.i("FACE_DETECTION", "NO FACE DETECTED")
+                                statusTextView.text = "No face detected ❌"
+                            }
+                        }
+                     },
+                     onError = { e ->
+                        Log.e("FACE_DETECTION", "Error in detection", e)
+                     }
+                 )
+                 
+                 // Initial UI update
+                 runOnUiThread {
                     findViewById<TextView>(R.id.statusTextView).text = "Analyzing Camera Frame..."
-                }
+                 }
             }
         }
         imageProxy.close()
@@ -231,15 +221,17 @@ class MainActivity : AppCompatActivity() {
                          withContext(Dispatchers.Main) {
                              statusTextView.text = "Processing frame at ${currentTimeMs}ms..."
                              
-                             // We define a specialized callback for this loop or re-use global helper
-                             // Re-using global helper which logs to Logcat is enough per requirements
-                             // But we want frame-specific timestamp logging, so we use a local one or update our logging strategy.
-                             // For verification, we'll just use a local inline helper that logs with the tag.
-                             val detector = FaceDetectorHelper(
+                             faceDetectorHelper?.detectFace(
+                                 bitmap = bitmap,
                                  onSuccess = { bounds ->
                                      if (bounds != null) {
                                          Log.i("FACE_DETECTION", "timestamp=${currentTimeMs}ms — FACE DETECTED bbox=$bounds")
                                          statusTextView.text = "Face detected at ${currentTimeMs}ms ✅"
+                                         
+                                         // Preprocess
+                                         processingScope.launch(Dispatchers.Default) {
+                                             preprocessFaceForModel(bitmap, bounds)
+                                         }
                                      } else {
                                           Log.i("FACE_DETECTION", "timestamp=${currentTimeMs}ms — NO FACE")
                                           statusTextView.text = "No face detected at ${currentTimeMs}ms ❌"
@@ -249,7 +241,6 @@ class MainActivity : AppCompatActivity() {
                                      Log.e("FACE_DETECTION", "Error detecting face at ${currentTimeMs}ms", e)
                                  }
                              )
-                             detector.detectFace(bitmap)
                          }
                      }
                      
@@ -269,6 +260,61 @@ class MainActivity : AppCompatActivity() {
              } finally {
                  retriever.release()
              }
+        }
+    }
+
+    private fun preprocessFaceForModel(originalBitmap: Bitmap, boundingBox: android.graphics.Rect) {
+        try {
+            // 1. Clamp bounding box
+            val left = boundingBox.left.coerceAtLeast(0)
+            val top = boundingBox.top.coerceAtLeast(0)
+            val width = boundingBox.width().coerceAtMost(originalBitmap.width - left)
+            val height = boundingBox.height().coerceAtMost(originalBitmap.height - top)
+            
+            if (width <= 0 || height <= 0) {
+                 Log.w("FACE_PREPROCESS", "Invalid face crop dimensions: $width x $height")
+                 return
+            }
+
+            // 2. Crop
+            val croppedBitmap = android.graphics.Bitmap.createBitmap(originalBitmap, left, top, width, height)
+            
+            // 3. Resize to 224x224
+            val scaledBitmap = android.graphics.Bitmap.createScaledBitmap(croppedBitmap, 224, 224, true)
+            
+            // UI Verification: Show cropped face
+            runOnUiThread {
+                val facePreview = findViewById<android.widget.ImageView>(R.id.facePreview)
+                facePreview.setImageBitmap(scaledBitmap)
+                facePreview.visibility = View.VISIBLE
+            }
+            
+            // 4. Normalize (0-1 float) & Convert to ByteBuffer
+            // Allocate Direct ByteBuffer: 1 * 224 * 224 * 3 * 4 (float)
+            val inputBuffer = java.nio.ByteBuffer.allocateDirect(1 * 224 * 224 * 3 * 4)
+            inputBuffer.order(java.nio.ByteOrder.nativeOrder())
+            
+            val intValues = IntArray(224 * 224)
+            scaledBitmap.getPixels(intValues, 0, 224, 0, 0, 224, 224)
+            
+            var pixel = 0
+            for (i in 0 until 224) {
+                for (j in 0 until 224) {
+                    val input = intValues[pixel++]
+                    
+                    // Normalize to 0.0 - 1.0 (assuming model expects this range)
+                    // If -1 to 1: ((val and 0xFF) - 127.5f) / 127.5f
+                    // We'll use 0-1 for now as per plan
+                    inputBuffer.putFloat(((input shr 16 and 0xFF) / 255.0f))
+                    inputBuffer.putFloat(((input shr 8 and 0xFF) / 255.0f))
+                    inputBuffer.putFloat(((input and 0xFF) / 255.0f))
+                }
+            }
+            
+            Log.i("PREPROCESS_FACE", "Valid Crop: ${width}x${height} | Resized: 224x224 | TensorBuffer Created")
+            
+        } catch (e: Exception) {
+            Log.e("PREPROCESS_FACE", "Error preprocessing face", e)
         }
     }
 

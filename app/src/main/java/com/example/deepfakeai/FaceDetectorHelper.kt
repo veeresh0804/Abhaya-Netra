@@ -8,10 +8,7 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
 
-class FaceDetectorHelper(
-    private val onSuccess: (Rect?) -> Unit,
-    private val onError: (Exception) -> Unit
-) {
+class FaceDetectorHelper {
     private val detector: FaceDetector
 
     init {
@@ -25,22 +22,23 @@ class FaceDetectorHelper(
         detector = FaceDetection.getClient(options)
     }
 
-    fun detectFace(bitmap: Bitmap) {
+    fun detectFace(
+        bitmap: Bitmap,
+        onSuccess: (Rect?) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
         val image = InputImage.fromBitmap(bitmap, 0)
         
         detector.process(image)
             .addOnSuccessListener { faces ->
                 if (faces.isNotEmpty()) {
                     val face = faces[0]
-                    Log.i("FaceDetector", "Face detected! Bounding box: ${face.boundingBox}")
                     onSuccess(face.boundingBox)
                 } else {
-                    Log.i("FaceDetector", "No face detected in the provided bitmap.")
                     onSuccess(null)
                 }
             }
             .addOnFailureListener { e ->
-                Log.e("FaceDetector", "Face detection failed", e)
                 onError(e)
             }
     }
