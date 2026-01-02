@@ -1,0 +1,13 @@
+/.idea
+/.gradle
+/local.properties
+/build
+/app/build
+/captures/
+/*.iml
+
+# Ignore ML models
+app/src/main/assets/*.tflite
+
+# Ignore release keys
+*.jks
