@@ -16,7 +16,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Preview for Cropped Face (Verification Only) -->
     <ImageView
         android:id="@+id/facePreview"
         android:layout_width="120dp"
@@ -26,6 +25,205 @@
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Settings Toggle Button -->
+    <ImageButton
+        android:id="@+id/btnSettings"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="#80000000"
+        android:src="@android:drawable/ic_menu_preferences"
+        app:tint="#FFFFFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Trust Badges Container -->
+    <LinearLayout
+        android:id="@+id/badgesContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Offline Mode Badge -->
+        <TextView
+            android:id="@+id/badgeOffline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Offline Mode"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="#80607D8B"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone" />
+
+        <!-- Privacy Badge -->
+        <TextView
+            android:id="@+id/badgePrivacy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔒 On-Device Processing"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="#804CAF50" />
+
+    </LinearLayout>
+
+    <!-- Settings Panel (Hidden by default) -->
+    <ScrollView
+        android:id="@+id/settingsPanel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#DD000000"
+        android:padding="24dp"
+        android:visibility="gone"
+        android:elevation="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Detection Settings"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Smoothing Window -->
+            <TextView
+                android:id="@+id/lblSmoothing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Smoothing Window: 15"
+                android:textColor="#FFFFFF" />
+            <SeekBar
+                android:id="@+id/sliderSmoothing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="40"
+                android:min="5"
+                android:progress="15"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Low Risk Threshold -->
+            <TextView
+                android:id="@+id/lblLowRisk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Low Risk Max: 0.35"
+                android:textColor="#FFFFFF" />
+            <SeekBar
+                android:id="@+id/sliderLowRisk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="50"
+                android:min="20"
+                android:progress="35"
+                android:layout_marginBottom="16dp" />
+
+            <!-- High Risk Threshold -->
+            <TextView
+                android:id="@+id/lblHighRisk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="High Risk Min: 0.65"
+                android:textColor="#FFFFFF" />
+            <SeekBar
+                android:id="@+id/sliderHighRisk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="90"
+                android:min="50"
+                android:progress="65"
+                android:layout_marginBottom="16dp" />
+            
+            <!-- Hysteresis Toggle -->
+            <Switch
+                android:id="@+id/switchHysteresis"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Enable Hysteresis"
+                android:textColor="#FFFFFF"
+                android:checked="true"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Action Buttons -->
+            <Button
+                android:id="@+id/btnResetSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Reset to Defaults"
+                android:backgroundTint="#607D8B"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnCloseSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Close" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Visual Risk Indicator (Banner) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/riskBannerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#00000000"
+        android:elevation="8dp"
+        android:visibility="invisible"
+        android:alpha="0"
+        app:layout_constraintTop_toBottomOf="@+id/btnSettings"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+        
+        <ImageView
+            android:id="@+id/riskIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_delete"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="16dp"
+            app:tint="#FFFFFF"/>
+            
+        <TextView
+            android:id="@+id/riskBannerText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Risk Status"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@+id/riskIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -61,6 +259,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Live Camera Detection" />
+
+        <!-- Session Summary Panel -->
+        <TextView
+            android:id="@+id/sessionSummaryTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:padding="12dp"
+            android:background="#40FFFFFF"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="monospace"
+            android:text="Session Summary\n---\nWaiting for analysis..." />
 
     </LinearLayout>
 
