@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content"
+    android:id="@+id/expandedPanel"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="12dp"
+    android:backgroundTint="#1E1E1E">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🛡️ Sentinel Active"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:paddingBottom="12dp" />
+
+        <!-- Real-Time Stats -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#2A2A2A"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/tvFacesDetected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="👤 Faces: 0"
+                android:textColor="#CCCCCC"
+                android:textSize="14sp"
+                android:paddingVertical="4dp" />
+
+            <TextView
+                android:id="@+id/tvRiskLevel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚠️ Risk: Low"
+                android:textColor="#4CAF50"
+                android:textSize="14sp"
+                android:paddingVertical="4dp" />
+
+            <TextView
+                android:id="@+id/tvAudioStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎤 Audio: Monitoring"
+                android:textColor="#CCCCCC"
+                android:textSize="14sp"
+                android:paddingVertical="4dp" />
+
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <Button
+            android:id="@+id/btnQuickScanFromOrb"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="⚡ Quick Scan"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#2196F3"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnViewReports"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="📊 View Reports"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#9C27B0"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnOpenSettings"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="⚙️ Settings"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#607D8B"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnMinimize"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="Minimize"
+            android:textColor="#999999"
+            style="@style/Widget.Material3.Button.TextButton" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

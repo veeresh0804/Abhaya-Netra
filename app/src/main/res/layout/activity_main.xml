@@ -4,91 +4,124 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient"
     tools:context=".MainActivity">
 
+    <!-- Camera Preview -->
     <androidx.camera.view.PreviewView
         android:id="@+id/viewFinder"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintBottom_toTopOf="@+id/controlsCard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/headerCard" />
 
-    <ImageView
-        android:id="@+id/facePreview"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+    <!-- Face Preview (Floating) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/facePreviewCard"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_margin="16dp"
-        android:background="#FF0000"
-        android:scaleType="fitCenter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Settings Toggle Button -->
-    <ImageButton
-        android:id="@+id/btnSettings"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="16dp"
-        android:background="#80000000"
-        android:src="@android:drawable/ic_menu_preferences"
-        app:tint="#FFFFFF"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Trust Badges Container -->
-    <LinearLayout
-        android:id="@+id/badgesContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="16dp"
+        android:elevation="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="#1A1A2E"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+        
+        <ImageView
+            android:id="@+id/facePreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="Face preview" />
+    </androidx.cardview.widget.CardView>
 
-        <!-- Offline Mode Badge -->
-        <TextView
-            android:id="@+id/badgeOffline"
-            android:layout_width="wrap_content"
+    <!-- Header Card (Settings + Badges) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/headerCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardBackgroundColor="#1A1A2E"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/facePreviewCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Offline Mode"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:background="#80607D8B"
-            android:layout_marginEnd="8dp"
-            android:visibility="gone" />
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical">
 
-        <!-- Privacy Badge -->
-        <TextView
-            android:id="@+id/badgePrivacy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🔒 On-Device Processing"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:background="#804CAF50" />
+            <!-- Settings Button -->
+            <ImageButton
+                android:id="@+id/btnSettings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_menu_preferences"
+                app:tint="#667eea"
+                android:contentDescription="Settings" />
 
-    </LinearLayout>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
 
-    <!-- Settings Panel (Hidden by default) -->
+            <!-- Badges Container -->
+            <LinearLayout
+                android:id="@+id/badgesContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Offline Badge -->
+                <TextView
+                    android:id="@+id/badgeOffline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Offline"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:background="@drawable/button_accent"
+                    android:layout_marginEnd="8dp"
+                    android:visibility="gone" />
+
+                <!-- Privacy Badge -->
+                <TextView
+                    android:id="@+id/badgePrivacy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔒 On-Device"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:background="@drawable/button_secondary" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Settings Panel -->
     <ScrollView
         android:id="@+id/settingsPanel"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="#DD000000"
-        android:padding="24dp"
+        android:background="#E6000000"
+        android:padding="20dp"
         android:visibility="gone"
-        android:elevation="10dp"
+        android:elevation="20dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -100,179 +133,345 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Detection Settings"
-                android:textSize="20sp"
+                android:text="⚙️ Detection Settings"
+                android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF"
                 android:layout_marginBottom="24dp" />
 
-            <!-- Smoothing Window -->
-            <TextView
-                android:id="@+id/lblSmoothing"
+            <!-- Smoothing Window Card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Smoothing Window: 15"
-                android:textColor="#FFFFFF" />
-            <SeekBar
-                android:id="@+id/sliderSmoothing"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="40"
-                android:min="5"
-                android:progress="15"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#1A1A2E"
+                app:cardCornerRadius="16dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView
+                        android:id="@+id/lblSmoothing"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Smoothing Window: 15"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+                    <SeekBar
+                        android:id="@+id/sliderSmoothing"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="40"
+                        android:min="5"
+                        android:progress="15" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-            <!-- Low Risk Threshold -->
-            <TextView
-                android:id="@+id/lblLowRisk"
+            <!-- Low Risk Threshold Card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Low Risk Max: 0.35"
-                android:textColor="#FFFFFF" />
-            <SeekBar
-                android:id="@+id/sliderLowRisk"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="50"
-                android:min="20"
-                android:progress="35"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#1A1A2E"
+                app:cardCornerRadius="16dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView
+                        android:id="@+id/lblLowRisk"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Low Risk Max: 0.35"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+                    <SeekBar
+                        android:id="@+id/sliderLowRisk"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="50"
+                        android:min="20"
+                        android:progress="35" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-            <!-- High Risk Threshold -->
-            <TextView
-                android:id="@+id/lblHighRisk"
+            <!-- High Risk Threshold Card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="High Risk Min: 0.65"
-                android:textColor="#FFFFFF" />
-            <SeekBar
-                android:id="@+id/sliderHighRisk"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#1A1A2E"
+                app:cardCornerRadius="16dp">
+                
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <TextView
+                        android:id="@+id/lblHighRisk"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="High Risk Min: 0.65"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+                    <SeekBar
+                        android:id="@+id/sliderHighRisk"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="90"
+                        android:min="50"
+                        android:progress="65" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Hysteresis Toggle Card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:max="90"
-                android:min="50"
-                android:progress="65"
-                android:layout_marginBottom="16dp" />
-            
-            <!-- Hysteresis Toggle -->
-            <Switch
-                android:id="@+id/switchHysteresis"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Enable Hysteresis"
-                android:textColor="#FFFFFF"
-                android:checked="true"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#1A1A2E"
+                app:cardCornerRadius="16dp">
+                
+                <Switch
+                    android:id="@+id/switchHysteresis"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Enable Hysteresis"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:checked="true"
+                    android:padding="16dp" />
+            </androidx.cardview.widget.CardView>
 
             <!-- Action Buttons -->
             <Button
                 android:id="@+id/btnResetSettings"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:text="Reset to Defaults"
-                android:backgroundTint="#607D8B"
-                android:layout_marginBottom="8dp" />
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_secondary"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:layout_marginBottom="12dp" />
 
             <Button
                 android:id="@+id/btnCloseSettings"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Close" />
+                android:layout_height="56dp"
+                android:text="Close"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/button_primary"
+                android:textAllCaps="false"
+                android:textSize="16sp" />
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Visual Risk Indicator (Banner) -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Risk Banner -->
+    <androidx.cardview.widget.CardView
         android:id="@+id/riskBannerLayout"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#00000000"
-        android:elevation="8dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:visibility="invisible"
         android:alpha="0"
-        app:layout_constraintTop_toBottomOf="@+id/btnSettings"
-        app:layout_constraintStart_toStartOf="parent"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp">
-        
-        <ImageView
-            android:id="@+id/riskIcon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@android:drawable/ic_delete"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="16dp"
-            app:tint="#FFFFFF"/>
-            
-        <TextView
-            android:id="@+id/riskBannerText"
-            android:layout_width="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/headerCard">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Risk Status"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintStart_toEndOf="@+id/riskIcon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                android:id="@+id/riskIcon"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/ic_delete"
+                app:tint="#FFFFFF" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/riskBannerText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Risk Status"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Controls Card (Bottom) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/controlsCard"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:background="#80000000"
+        android:layout_margin="16dp"
+        app:cardBackgroundColor="#1A1A2E"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:id="@+id/statusTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Ready"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-
-        <Button
-            android:id="@+id/btnSelectVideo"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Select Video"
-            android:layout_marginBottom="8dp" />
+            android:orientation="vertical"
+            android:padding="20dp">
 
-        <Button
-            android:id="@+id/btnLiveCamera"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Live Camera Detection" />
+            <!-- Status Text -->
+            <TextView
+                android:id="@+id/statusTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Ready to Scan"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp" />
 
-        <!-- Session Summary Panel -->
-        <TextView
-            android:id="@+id/sessionSummaryTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:padding="12dp"
-            android:background="#40FFFFFF"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:fontFamily="monospace"
-            android:text="Session Summary\n---\nWaiting for analysis..." />
+            <!-- Quick Scan Button -->
+            <Button
+                android:id="@+id/btnQuickScan"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="⚡ QUICK SCAN"
+                android:background="@drawable/button_accent"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textAllCaps="false"
+                android:elevation="4dp"
+                android:layout_marginBottom="12dp" />
 
-    </LinearLayout>
+            <!-- Mode Selection Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <Button
+                    android:id="@+id/btnSelectVideo"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="📹 Video"
+                    android:background="@drawable/button_primary"
+                    android:textColor="#FFFFFF"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/btnLiveCamera"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="📸 Live Cam"
+                    android:background="@drawable/button_primary"
+                    android:textColor="#FFFFFF"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/btnScreenCapture"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:text="📺 Screen"
+                    android:background="@drawable/button_primary"
+                    android:textColor="#FFFFFF"
+                    android:textAllCaps="false"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Action Buttons Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <Button
+                    android:id="@+id/btnExportSession"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:text="📊 Export"
+                    android:background="@drawable/button_secondary"
+                    android:textColor="#FFFFFF"
+                    android:textAllCaps="false"
+                    android:textSize="13sp"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/btnViewExplanation"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:text="📖 Info"
+                    android:background="@drawable/button_secondary"
+                    android:textColor="#FFFFFF"
+                    android:textAllCaps="false"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Sentinel Mode Button -->
+            <Button
+                android:id="@+id/btnSentinelMode"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="🛡️ ENABLE SENTINEL MODE"
+                android:background="@drawable/button_primary"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:elevation="4dp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Session Summary -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#0D0D1A"
+                app:cardCornerRadius="12dp">
+                
+                <TextView
+                    android:id="@+id/sessionSummaryTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:textColor="#B0B0B0"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:text="📊 SESSION SUMMARY\n────────────────────\nWaiting for analysis..." />
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

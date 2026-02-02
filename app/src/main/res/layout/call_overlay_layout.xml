@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/callOverlayContainer"
+    android:background="#DD000000"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:elevation="999dp">
+
+    <!-- Risk Indicator Bar (Green/Yellow/Red) -->
+    <View
+        android:id="@+id/riskIndicatorBar"
+        android:layout_width="8dp"
+        android:layout_height="match_parent"
+        android:background="#4CAF50"
+        android:layout_marginEnd="12dp" />
+
+    <!-- Content -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🛡️ Sentinel Monitoring"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvCallRiskStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Analyzing voice..."
+            android:textColor="#CCCCCC"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvCallConfidence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confidence: --"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginTop="4dp" />
+
+    </LinearLayout>
+
+    <!-- Emergency End Call Button (only shows on HIGH risk) -->
+    <Button
+        android:id="@+id/btnEmergencyEndCall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="END CALL"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#F44336"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:visibility="gone"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp" />
+
+</LinearLayout>

@@ -30,6 +30,11 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    
+    // Prevent compression of TFLite model files
+    aaptOptions {
+        noCompress("tflite")
+    }
 }
 
 dependencies {

@@ -8,7 +8,6 @@ import android.os.Build
 import android.provider.Settings
 import android.media.projection.MediaProjectionManager
 import android.app.Activity
-import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
@@ -38,7 +37,6 @@ import java.nio.channels.FileChannel
 import android.view.animation.AnimationUtils
 import android.view.animation.ScaleAnimation
 import android.widget.Button
-import androidx.cardview.widget.CardView
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -149,9 +147,6 @@ class MainActivity : AppCompatActivity() {
     // Coroutine scope for background processing
     private val processingScope = CoroutineScope(Dispatchers.Main + Job())
     private var currentProcessingJob: Job? = null
-    
-    // Report Manager for persistent storage
-    private lateinit var reportManager: ReportManager
 
     // Permission Launcher
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -196,9 +191,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         cameraExecutor = Executors.newSingleThreadExecutor()
-        
-        // Initialize Report Manager
-        reportManager = ReportManager(this)
         
         // Connectivity Logic
         connectivityManager = getSystemService(ConnectivityManager::class.java)
@@ -424,26 +416,6 @@ class MainActivity : AppCompatActivity() {
                 startSentinelMode()
             }
         }
-
-        // Screen Capture Button Handler
-        val btnScreenCapture = findViewById<Button>(R.id.btnScreenCapture)
-        btnScreenCapture.setOnClickListener {
-            animateButton(it)
-            selectedMode = AppMode.SCREEN_CAPTURE_MODE
-            currentProcessingJob?.cancel() // Stop any existing processing
-            synchronized(scoreBuffer) { scoreBuffer.clear() } // Reset score buffer
-            currentRiskLevel = RiskLevel.LOW // Reset risk state
-            sessionStats.reset() // Reset session stats
-            Log.i("SESSION_LOG", "Session reset for SCREEN_CAPTURE mode")
-
-            // Hide banner
-            findViewById<View>(R.id.riskBannerLayout).visibility = View.INVISIBLE
-            viewFinder.visibility = View.INVISIBLE // Hide camera preview
-
-            statusTextView.text = "Screen capture mode selected. Requesting permission..."
-            Log.d("DeepfakeAI", "Mode changed to: $selectedMode")
-            requestScreenCapturePermission()
-        }
     }
     
     private fun startSentinelMode() {
@@ -457,18 +429,6 @@ class MainActivity : AppCompatActivity() {
             }
             statusTextView.text = "🛡️ Sentinel Mode Activated - Monitoring Active"
             Log.i("SENTINEL_MODE", "Sentinel Orb Service started successfully")
-            
-            // Also request screen capture permission for background monitoring
-            // Check if we should auto-start screen capture
-            val projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-            val captureIntent = projectionManager.createScreenCaptureIntent()
-            
-            statusTextView.append("\n\nEnable screen monitoring for social media apps?")
-            Log.i("SENTINEL_MODE", "Prompting for screen capture to enable background monitoring")
-            
-            // Request screen capture permission
-            screenCapturePermissionLauncher.launch(captureIntent)
-            
         } catch (e: Exception) {
             Log.e("SENTINEL_MODE", "Error starting Sentinel Mode", e)
             statusTextView.text = "Failed to start Sentinel Mode ❌"
@@ -641,8 +601,6 @@ class MainActivity : AppCompatActivity() {
                  
                  withContext(Dispatchers.Main) {
                      statusTextView.text = "Video Processing Complete ✅"
-                     // Save report
-                     saveDetectionReport("Video")
                  }
                  
              } catch (e: Exception) {
@@ -774,11 +732,7 @@ class MainActivity : AppCompatActivity() {
                 // Update Visual Risk Indicator
                 updateRiskVisuals(newRiskLevel, smoothedScore)
                 
-                // Send update to SentinelOrb if it's running
-                sendSentinelUpdate(smoothedScore, newRiskLevel, sessionStats.facesDetected)
-                
                 Log.i("RISK_UI", "Displayed: ${newRiskLevel.displayName} ($percentage%)")
-
             }
             
         } catch (e: Exception) {
@@ -787,23 +741,34 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun updateRiskVisuals(riskLevel: RiskLevel, confidence: Float) {
-        val bannerLayout = findViewById<CardView>(R.id.riskBannerLayout)
+        val bannerLayout = findViewById<androidx.constraintlayout.widget.ConstraintLayout>(R.id.riskBannerLayout)
         val bannerIcon = findViewById<android.widget.ImageView>(R.id.riskIcon)
         val bannerText = findViewById<TextView>(R.id.riskBannerText)
         
         // Ensure visible
-        if (bannerLayout?.visibility != View.VISIBLE) {
-            bannerLayout?.visibility = View.VISIBLE
-            bannerLayout?.animate()?.alpha(1f)?.setDuration(300)?.start()
+        if (bannerLayout.visibility != View.VISIBLE) {
+            bannerLayout.visibility = View.VISIBLE
+            bannerLayout.animate().alpha(1f).setDuration(300).start()
         }
         
         // Update Content
         val percentage = (confidence * 100).toInt()
-        bannerIcon?.setImageResource(riskLevel.iconResId)
-        bannerText?.text = "${riskLevel.displayName}\nDeepfake likelihood: $percentage%"
+        bannerIcon.setImageResource(riskLevel.iconResId)
+        bannerText.text = "${riskLevel.displayName}\nDeepfake likelihood: $percentage%"
         
-        // Use setCardBackgroundColor for CardView
-        bannerLayout?.setCardBackgroundColor(riskLevel.colorHex)
+        // Animate Color Change (Simple substitution for now, could use ValueAnimator for smooth color)
+        val color = riskLevel.colorHex
+        
+        // Semi-transparent background for banner
+        // We'll apply the color with some transparency
+        val backgroundDrawable = android.graphics.drawable.GradientDrawable()
+        backgroundDrawable.setColor(color)
+        backgroundDrawable.cornerRadius = 16f // 8dp -> 16px approx
+        backgroundDrawable.alpha = 230 // 0-255
+        
+        bannerLayout.background = backgroundDrawable
+        
+        // Log only on state change or significant update (handled by caller mostly, but useful here)
     }
     
     private fun updateSessionSummaryUI() {
@@ -902,77 +867,8 @@ class MainActivity : AppCompatActivity() {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    // Screen Capture Helper Methods
-    private fun requestScreenCapturePermission() {
-        val projectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        val intent = projectionManager.createScreenCaptureIntent()
-        screenCapturePermissionLauncher.launch(intent)
-        findViewById<TextView>(R.id.statusTextView).text = "Grant screen capture permission..."
-    }
-    
-    private fun startScreenCaptureService(resultCode: Int, data: Intent) {
-        val intent = Intent(this, ScreenCaptureService::class.java).apply {
-            action = ScreenCaptureService.ACTION_START
-            putExtra(ScreenCaptureService.EXTRA_RESULT_CODE, resultCode)
-            putExtra(ScreenCaptureService.EXTRA_RESULT_DATA, data)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
-        findViewById<TextView>(R.id.statusTextView).text = "📺 Screen Capture Active"
-        Log.i("SCREEN_CAPTURE", "Service started")
-    }
-    
-    private fun stopScreenCaptureService() {
-        val intent = Intent(this, ScreenCaptureService::class.java).apply {
-            action = ScreenCaptureService.ACTION_STOP
-        }
-        startService(intent)
-    }
-    
-    private fun sendSentinelUpdate(confidence: Float, riskLevel: RiskLevel, faces: Int) {
-        val intent = Intent(this, SentinelOrbService::class.java).apply {
-            action = SentinelOrbService.ACTION_UPDATE_CONFIDENCE
-            putExtra(SentinelOrbService.EXTRA_CONFIDENCE, confidence)
-            putExtra(SentinelOrbService.EXTRA_RISK_LEVEL, riskLevel.displayName)
-            putExtra(SentinelOrbService.EXTRA_FACES, faces)
-            putExtra(SentinelOrbService.EXTRA_AUDIO_STATUS, "Inactive")
-        }
-        try {
-            startService(intent)
-            Log.i("SENTINEL_UPDATE", "Sent update: $confidence | ${riskLevel.displayName}")
-        } catch (e: Exception) {
-            Log.e("SENTINEL_UPDATE", "Failed to send update", e)
-        }
-    }
-    
-    private fun saveDetectionReport(mode: String) {
-        try {
-            val report = DetectionReport(
-                timestamp = System.currentTimeMillis(),
-                mode = mode,
-                confidence = sessionStats.peakScore,
-                riskLevel = currentRiskLevel.displayName,
-                facesDetected = sessionStats.facesDetected,
-                sessionDuration = sessionStats.sessionDurationMs,
-                averageScore = sessionStats.averageScore,
-                peakScore = sessionStats.peakScore,
-                framesProcessed = sessionStats.framesProcessed,
-                inferenceCalls = sessionStats.inferenceCalls
-            )
-            reportManager.saveReport(report)
-            Log.i("REPORT_SAVED", "Detection report saved: ${report.mode} - ${report.riskLevel}")
-        } catch (e: Exception) {
-            Log.e("REPORT_SAVE_ERROR", "Failed to save report", e)
-        }
-    }
-
     override fun onDestroy() {
-
         super.onDestroy()
         cameraExecutor.shutdown()
-        stopScreenCaptureService()
     }
 }
